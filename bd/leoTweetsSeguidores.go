@@ -8,12 +8,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-/*LeoTweetsSeguidores lee los tweets de los seguidores*/
+/*LeoTweetsSeguidores lee los tweets de mis seguidores */
 func LeoTweetsSeguidores(ID string, pagina int) ([]models.DevuelvoTweetsSeguidores, bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	db := MongoCN.Database("backTwit")
+	db := MongoCN.Database("twittor")
 	col := db.Collection("relations")
 
 	skip := (pagina - 1) * 20
@@ -22,13 +22,13 @@ func LeoTweetsSeguidores(ID string, pagina int) ([]models.DevuelvoTweetsSeguidor
 	condiciones = append(condiciones, bson.M{"$match": bson.M{"usuarioid": ID}})
 	condiciones = append(condiciones, bson.M{
 		"$lookup": bson.M{
-			"from":         "tweet",
+			"from":         "twitt",
 			"localField":   "usuariorelacionid",
-			"foreingField": "userid",
-			"as":           "tweet",
+			"foreignField": "userid",
+			"as":           "twitt",
 		}})
-	condiciones = append(condiciones, bson.M{"$unwind": "$tweet"})
-	condiciones = append(condiciones, bson.M{"$sort": bson.M{"fecha": -1}})
+	condiciones = append(condiciones, bson.M{"$unwind": "$twitt"})
+	condiciones = append(condiciones, bson.M{"$sort": bson.M{"twitt.fecha": -1}})
 	condiciones = append(condiciones, bson.M{"$skip": skip})
 	condiciones = append(condiciones, bson.M{"$limit": 20})
 
